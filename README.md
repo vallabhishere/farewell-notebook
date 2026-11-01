@@ -16,10 +16,6 @@ This example note was exported from the running template using fictional sample 
 
 ![Example farewell note exported from the template](docs/images/sample-note.png)
 
-The site also includes a small, optional illustration for the opening experience:
-
-![Decorative crossing-paths illustration included with the template](public/art-crossing-paths.webp)
-
 This is a generic, separate project. It contains no original farewell recipient list, private messages, production links, production credentials, or production database IDs. Create a new database and deployment for your own site. Never connect a public fork to somebody else's records.
 
 ## Quick start
