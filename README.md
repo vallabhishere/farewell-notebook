@@ -4,6 +4,14 @@ A customizable farewell microsite starter. It includes a personal note, optional
 
 ## Preview
 
+The homepage, envelope selection, and owner dashboard below are screenshots of the running template. The dashboard uses fictional sample activity; it does not show data from the live farewell site.
+
+![Generic farewell notebook homepage](docs/images/homepage.jpg)
+
+![The five generic farewell envelopes](docs/images/envelopes.jpg)
+
+![Activity dashboard with fictional sample data](docs/images/activity-dashboard.jpg)
+
 This example note was exported from the running template using fictional sample content. It shows the image visitors can save from their own farewell page.
 
 ![Example farewell note exported from the template](docs/images/sample-note.png)
