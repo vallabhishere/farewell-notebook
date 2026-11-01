@@ -2,6 +2,16 @@
 
 A customizable farewell microsite starter. It includes a personal note, optional recipient-specific paragraphs, playful suggestion forms, a downloadable note image, optional project and stock prompts, analytics, and a password-protected owner dashboard.
 
+## Preview
+
+This example note was exported from the running template using fictional sample content. It shows the image visitors can save from their own farewell page.
+
+![Example farewell note exported from the template](docs/images/sample-note.png)
+
+The site also includes a small, optional illustration for the opening experience:
+
+![Decorative crossing-paths illustration included with the template](public/art-crossing-paths.webp)
+
 This is a generic, separate project. It contains no original farewell recipient list, private messages, production links, production credentials, or production database IDs. Create a new database and deployment for your own site. Never connect a public fork to somebody else's records.
 
 ## Quick start
