@@ -1,4 +1,4 @@
-# Farewell Notebook
+# Office Farewell Notebook
 
 A customizable farewell microsite starter. It includes a personal note, optional recipient-specific paragraphs, playful suggestion forms, a downloadable note image, optional project and stock prompts, analytics, and a password-protected owner dashboard.
 
