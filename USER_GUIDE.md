@@ -12,6 +12,8 @@ Use GitHub's **Use this template** button after the public template is published
 
 Edit `lib/site-config.ts`: author name, sign-off, introduction, message options, envelope wording, links, and optional project or stock idea sections. Generic personal paragraphs are already included. To address selected people individually, add entries to `lib/greetings.ts` in your private copy; leave that file empty to keep messages generic.
 
+Visitor analytics are enabled by default so the private activity page can show visits and visitor journeys. Forms also save names and submitted replies. Review the privacy copy for your use case, tell visitors what you collect, and set `analyticsEnabled` to `false` in `lib/site-config.ts` if you do not want to collect activity.
+
 ### 3. Pick one database
 
 Install dependencies, copy `.env.example` to `.env.local`, and set `DATABASE_PROVIDER` to `d1`, `firebase`, or `supabase`. Follow the matching instructions in the README and the SQL/rules file under `database/`. `local` is for development only. Keep database credentials in `.env.local` locally and as private environment variables on the host.

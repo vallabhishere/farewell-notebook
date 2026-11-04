@@ -36,7 +36,7 @@ Edit `lib/site-config.ts` for the author, sign-off, opening/reflection/closing c
 
 `lib/greetings.ts` starts empty. Add a small set of private name-to-note entries only in a private working copy. If you publish that copy publicly, anyone can read those notes. Generic message options are in `lib/site-config.ts`.
 
-Set `analyticsEnabled` to `true` only if you intend to collect visitor activity. The forms collect a visitor's first and last name and suggestion content. The optional repeat-visitor fingerprint is a one-way HMAC of the network address and browser signature; raw IPs are not saved by this feature.
+Visitor activity analytics are on by default. The private activity page groups page views, name lookups, envelope opens, form starts, submissions, links, and downloads into visitor journeys. Set `analyticsEnabled` to `false` in `lib/site-config.ts` to turn this off. Forms collect the visitor's first and last name and suggestion content. The optional repeat-visitor fingerprint is a one-way HMAC of the network address and browser signature; raw IPs are not saved by this feature. Tell visitors what you collect and how to contact you before sharing your site.
 
 ## Choose a database
 

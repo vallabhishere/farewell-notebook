@@ -59,6 +59,6 @@ export const farewellConfig = {
     detour: { title: "Send me on a detour.", teaser: "A book, a place, an adventure. Pick my next detour.", note: "I accept curated chaos." },
     catchup: { title: "A catch-up. No agenda.", teaser: "Coffee, lunch, dinner—or a drink. Pick the setting.", note: "Good company is a valid calendar invite." },
   },
-  analyticsEnabled: false,
+  analyticsEnabled: true,
   initialVisitCount: 0,
 } as const;
