@@ -71,4 +71,15 @@ export const firebaseStore: FarewellStore = {
     }
     return { messages, events };
   },
+  async consumeRateLimit(key, maximum, windowSeconds) {
+    const ref = store().collection("admin_rate_limits").doc(key), now = Math.floor(Date.now() / 1000);
+    return store().runTransaction(async (tx) => {
+      const snapshot = await tx.get(ref), value = snapshot.data();
+      const active = value && Number(value.window_started) + windowSeconds > now;
+      const start = active ? Number(value.window_started) : Math.floor(now / windowSeconds) * windowSeconds;
+      const hits = active ? Number(value.hits || 0) + 1 : 1;
+      tx.set(ref, { window_started: start, hits });
+      return { allowed: hits <= maximum, retryAfterSeconds: Math.max(1, start + windowSeconds - now) };
+    });
+  },
 };

@@ -1,5 +1,6 @@
 import { getStore } from '@/lib/storage';
 import { containsProfanity } from '@/lib/profanity';
+import { enforceGlobalLimit, enforceIpLimit, rateLimited } from '@/lib/rate-limit';
 async function visitorFingerprint(request: Request, secret?: string) {
  const ip = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '';
  if (!ip || !secret) return '';
@@ -60,6 +61,8 @@ export async function POST(request:Request){
  if(!/^[0-9a-f-]{36}$/i.test(p.id)||!p.firstName.trim()||p.firstName.length>50||p.name.trim()!==p.firstName.trim()||p.surname.length>60||!['coffee','memory','detour','stocks'].includes(p.kind)||p.choice.length>40||p.contact.length>320||p.message.length>2000||p.date.length>10||(p.kind!=='coffee'&&!p.message.trim()))return Response.json({error:'Check your response'},{status:400});
  if(containsProfanity(p.name,'name')||containsProfanity(p.surname,'name')||containsProfanity(p.message))return Response.json({error:'Please rephrase your note and try again.'},{status:422});
  if (p.sessionId !== undefined && (typeof p.sessionId !== 'string' || !/^[0-9a-f-]{36}$/i.test(p.sessionId))) return Response.json({error:'Invalid session'},{status:400});
+ const limit=await enforceIpLimit(request,'public-reply',10,3600);if(!limit.allowed)return rateLimited(limit.retryAfterSeconds);
+ const globalLimit=await enforceGlobalLimit('public-reply',1000,86400);if(!globalLimit.allowed)return rateLimited(globalLimit.retryAfterSeconds);
  const store = getStore();
  const fingerprint=await visitorFingerprint(request,process.env.FAREWELL_FINGERPRINT_KEY);
  const created=await store.insertMessage({ id:p.id, name:p.firstName.trim(), surname:p.surname.trim(), kind:p.kind, choice:p.choice, contact:p.contact.trim(), message:p.message.trim(), date:p.date, session_id:typeof p.sessionId==='string'?p.sessionId:'', fingerprint_hash:fingerprint });

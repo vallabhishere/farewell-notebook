@@ -41,4 +41,10 @@ export const d1Store: FarewellStore = {
     await query("DELETE FROM activity_events");
     return { messages:Number(before[0].results?.[0]?.total??0), events:Number(before[1].results?.[0]?.total??0) };
   },
+  async consumeRateLimit(key, maximum, windowSeconds) {
+    const now = Math.floor(Date.now() / 1000), start = Math.floor(now / windowSeconds) * windowSeconds;
+    await query("CREATE TABLE IF NOT EXISTS admin_rate_limits (key TEXT PRIMARY KEY, window_started INTEGER NOT NULL, hits INTEGER NOT NULL)");
+    const row = (await query<{hits:number;window_started:number}>("INSERT INTO admin_rate_limits (key,window_started,hits) VALUES (?,?,1) ON CONFLICT(key) DO UPDATE SET window_started=CASE WHEN admin_rate_limits.window_started+?>? THEN admin_rate_limits.window_started ELSE excluded.window_started END,hits=CASE WHEN admin_rate_limits.window_started+?>? THEN admin_rate_limits.hits+1 ELSE 1 END RETURNING hits,window_started", [key,start,windowSeconds,now,windowSeconds,now])).results?.[0];
+    return { allowed: Number(row?.hits ?? maximum + 1) <= maximum, retryAfterSeconds: Math.max(1, Number(row?.window_started ?? start) + windowSeconds - now) };
+  },
 };

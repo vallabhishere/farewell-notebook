@@ -53,7 +53,7 @@ All adapters are included in the same repository; choose one with `DATABASE_PROV
 
 ## Admin password and email
 
-Set `ADMIN_PASSWORD` and a unique random `ADMIN_SESSION_SECRET` (at least 32 characters) before deployment. `/activity`, its CSV export, and its clear-data action require the signed, HTTP-only admin cookie. The admin password is independent of Google or ChatGPT accounts. Use a password manager and keep both values private.
+Set `ADMIN_PASSWORD` and a unique random `ADMIN_SESSION_SECRET` (at least 32 characters) before deployment. `/activity`, its CSV export, and its clear-data action require the signed, HTTP-only admin cookie. Admin login is limited to five failed attempts per client address every 15 minutes. Public replies and analytics are rate-limited too. The admin password is independent of Google or ChatGPT accounts. Use a password manager and keep both values private. Rate limiting depends on a trusted proxy supplying the visitor address; Cloudflare supplies `CF-Connecting-IP`. If you use another host, set `TRUSTED_CLIENT_IP_HEADER` to a header that your hosting proxy overwrites with the true visitor address. Never use a header visitors can set themselves.
 
 Email alerts are optional. Set `NOTIFY_EMAIL`, `RESEND_API_KEY`, and `RESEND_FROM_EMAIL` to send one HTML notification per new suggestion. The sender address must be verified with Resend. Without all three values, suggestions are stored and email status remains pending.
 

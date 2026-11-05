@@ -27,3 +27,9 @@ CREATE TABLE IF NOT EXISTS messages (
 );
 CREATE INDEX IF NOT EXISTS messages_created_at_idx ON messages(created_at DESC);
 CREATE INDEX IF NOT EXISTS messages_session_idx ON messages(session_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS admin_rate_limits (
+  key TEXT PRIMARY KEY,
+  window_started INTEGER NOT NULL,
+  hits INTEGER NOT NULL
+);

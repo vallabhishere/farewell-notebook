@@ -1,5 +1,6 @@
 import { getStore } from '@/lib/storage';
 import { farewellConfig } from '@/lib/site-config';
+import { enforceIpLimit, rateLimited } from '@/lib/rate-limit';
 
 const startingCount = farewellConfig.initialVisitCount;
 
@@ -20,6 +21,8 @@ export async function POST(request: Request) {
   if (!farewellConfig.analyticsEnabled) return Response.json({ count: startingCount }, { headers: { 'Cache-Control': 'no-store' } });
   const origin = request.headers.get('origin');
   if (origin && origin !== new URL(request.url).origin) return Response.json({ error: 'Invalid origin' }, { status: 403 });
+  const limit = await enforceIpLimit(request, 'page-counter', 30, 60);
+  if (!limit.allowed) return rateLimited(limit.retryAfterSeconds);
 
   try {
     const raw = await request.text();

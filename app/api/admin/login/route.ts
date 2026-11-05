@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { adminCookieMaxAge, adminCookieName, makeAdminCookie } from "@/lib/admin-auth";
+import { enforceIpLimit, rateLimited } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   const origin = request.headers.get("origin");
@@ -16,7 +17,11 @@ export async function POST(request: Request) {
     if (typeof payload.password === "string") password = payload.password;
   } catch { return Response.json({ error: "Enter your password." }, { status: 400 }); }
   const digest = (value: string) => createHmac("sha256", process.env.ADMIN_SESSION_SECRET!).update(value).digest();
-  if (!timingSafeEqual(digest(password), digest(expected))) return Response.json({ error: "That password did not match." }, { status: 401 });
+  if (!timingSafeEqual(digest(password), digest(expected))) {
+    const limit = await enforceIpLimit(request, "admin-login", 5, 900);
+    if (!limit.allowed) return rateLimited(limit.retryAfterSeconds);
+    return Response.json({ error: "That password did not match." }, { status: 401 });
+  }
   const response = NextResponse.json({ ok: true }, { headers: { "Cache-Control": "no-store" } });
   response.cookies.set(adminCookieName, makeAdminCookie(), { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "strict", path: "/", maxAge: adminCookieMaxAge });
   return response;

@@ -2,16 +2,17 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import type { ActivityRow, FarewellStore, MessageRow } from "./types";
 
-type State = { activity_events: ActivityRow[]; messages: MessageRow[] };
+type State = { activity_events: ActivityRow[]; messages: MessageRow[]; rate_limits: Record<string, { window_started: number; hits: number }> };
 const filePath = resolve(process.cwd(), ".data/farewell.json");
 let writeQueue: Promise<unknown> = Promise.resolve();
 
 async function readState(): Promise<State> {
   try {
-    return JSON.parse(await readFile(filePath, "utf8")) as State;
+    const state = JSON.parse(await readFile(filePath, "utf8")) as Partial<State>;
+    return { activity_events: state.activity_events ?? [], messages: state.messages ?? [], rate_limits: state.rate_limits ?? {} };
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
-    return { activity_events: [], messages: [] };
+    return { activity_events: [], messages: [], rate_limits: {} };
   }
 }
 
@@ -69,6 +70,15 @@ export const localStore: FarewellStore = {
       state.messages = [];
       state.activity_events = [];
       return counts;
+    });
+  },
+  async consumeRateLimit(key, maximum, windowSeconds) {
+    return mutate((state) => {
+      const now = Math.floor(Date.now() / 1000), current = state.rate_limits[key];
+      const start = current && current.window_started + windowSeconds > now ? current.window_started : Math.floor(now / windowSeconds) * windowSeconds;
+      const hits = current && current.window_started === start ? current.hits + 1 : 1;
+      state.rate_limits[key] = { window_started: start, hits };
+      return { allowed: hits <= maximum, retryAfterSeconds: Math.max(1, start + windowSeconds - now) };
     });
   },
 };

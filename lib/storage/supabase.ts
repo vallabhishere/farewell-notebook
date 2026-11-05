@@ -9,7 +9,9 @@ type FarewellDatabase = {
       messages: Table<MessageRow, NewMessage & { email_status: string; created_at: string }>;
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      consume_admin_rate_limit: { Args: { p_key: string; p_max: number; p_window_seconds: number }; Returns: { allowed: boolean; retry_after_seconds: number }[] };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };
@@ -86,5 +88,11 @@ export const supabaseStore: FarewellStore = {
     ]);
     fail(messageError); fail(eventError);
     return { messages, events };
+  },
+  async consumeRateLimit(key, maximum, windowSeconds) {
+    const { data, error } = await db().rpc("consume_admin_rate_limit", { p_key: key, p_max: maximum, p_window_seconds: windowSeconds });
+    fail(error);
+    const row = data?.[0];
+    return { allowed: Boolean(row?.allowed), retryAfterSeconds: Number(row?.retry_after_seconds || windowSeconds) };
   },
 };

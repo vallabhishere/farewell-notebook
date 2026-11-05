@@ -35,4 +35,5 @@ export interface FarewellStore {
   countActivity(event?: string): Promise<number>;
   countMessages(predicate?: "pending" | "fingerprints"): Promise<number>;
   clear(): Promise<{ messages: number; events: number }>;
+  consumeRateLimit(key: string, maximum: number, windowSeconds: number): Promise<{ allowed: boolean; retryAfterSeconds: number }>;
 }
