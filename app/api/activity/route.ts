@@ -1,14 +1,14 @@
 import { getStore } from "@/lib/storage";
 import { farewellConfig } from "@/lib/site-config";
-import { enforceIpLimit, rateLimited } from "@/lib/rate-limit";
+import { enforceIpAndGlobalLimits, rateLimited } from "@/lib/rate-limit";
 
 const allowedEvents = new Set(["page_view", "page_hidden", "page_resumed", "page_exit", "name_entered", "personalized_note_viewed", "name_cleared", "envelope_opened", "form_started", "form_abandoned", "form_validation_error", "choice_changed", "form_field_focused", "form_submitted", "profanity_blocked", "scratch_card_revealed", "project_pause_started", "project_pause_stopped", "project_pause_completed", "whatsapp_draft_link_clicked", "invitation_downloaded", "personal_note_downloaded", "link_opened", "qr_scanned", "page_bottom_reached"]);
 
 export async function POST(request: Request) {
   if (!farewellConfig.analyticsEnabled) return Response.json({ ok: true, disabled: true });
   const origin = request.headers.get("origin");
-  if (origin && origin !== new URL(request.url).origin) return Response.json({ error: "Invalid origin" }, { status: 403 });
-  const limit = await enforceIpLimit(request, "public-activity", 120, 60);
+  if (!origin || origin !== new URL(request.url).origin) return Response.json({ error: "Invalid origin" }, { status: 403 });
+  const limit = await enforceIpAndGlobalLimits(request, "public-activity", 120, 60, 100000, 86400);
   if (!limit.allowed) return rateLimited(limit.retryAfterSeconds);
   try {
     const raw = await request.text();

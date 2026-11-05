@@ -15,6 +15,19 @@ export async function enforceGlobalLimit(scope: string, maximum: number, windowS
   return getStore().consumeRateLimit(key, maximum, windowSeconds);
 }
 
+export async function enforceIpAndGlobalLimits(
+  request: Request,
+  scope: string,
+  ipMaximum: number,
+  ipWindowSeconds: number,
+  globalMaximum: number,
+  globalWindowSeconds: number,
+) {
+  const ipResult = await enforceIpLimit(request, scope, ipMaximum, ipWindowSeconds);
+  if (!ipResult.allowed) return ipResult;
+  return enforceGlobalLimit(scope, globalMaximum, globalWindowSeconds);
+}
+
 export function rateLimited(retryAfterSeconds: number) {
   return Response.json({ error: "Too many requests. Please try again later." }, {
     status: 429,

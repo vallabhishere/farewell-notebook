@@ -1,5 +1,6 @@
 import { getStore } from '@/lib/storage';
 import { farewellConfig } from '@/lib/site-config';
+import { enforceIpAndGlobalLimits, rateLimited } from '@/lib/rate-limit';
 
 function allowedDestination(value: string): URL | null {
   try {
@@ -24,6 +25,8 @@ function allowedDestination(value: string): URL | null {
 }
 
 export async function GET(request: Request) {
+  const limit = await enforceIpAndGlobalLimits(request, 'track-link', 300, 3600, 20000, 3600);
+  if (!limit.allowed) return rateLimited(limit.retryAfterSeconds);
   const params = new URL(request.url).searchParams;
   const event = params.get('event');
   const sessionId = params.get('sessionId') ?? '';

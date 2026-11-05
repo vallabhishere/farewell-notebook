@@ -1,6 +1,6 @@
 import { getStore } from '@/lib/storage';
 import { farewellConfig } from '@/lib/site-config';
-import { enforceIpLimit, rateLimited } from '@/lib/rate-limit';
+import { enforceIpAndGlobalLimits, rateLimited } from '@/lib/rate-limit';
 
 const startingCount = farewellConfig.initialVisitCount;
 
@@ -8,8 +8,10 @@ async function getCount() {
   return startingCount + await getStore().countActivity("page_view");
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   if (!farewellConfig.analyticsEnabled) return Response.json({ count: startingCount }, { headers: { 'Cache-Control': 'no-store' } });
+  const limit = await enforceIpAndGlobalLimits(request, 'page-counter-read', 300, 60, 200000, 86400);
+  if (!limit.allowed) return rateLimited(limit.retryAfterSeconds);
   try {
     return Response.json({ count: await getCount() }, { headers: { 'Cache-Control': 'no-store' } });
   } catch {
@@ -20,8 +22,8 @@ export async function GET() {
 export async function POST(request: Request) {
   if (!farewellConfig.analyticsEnabled) return Response.json({ count: startingCount }, { headers: { 'Cache-Control': 'no-store' } });
   const origin = request.headers.get('origin');
-  if (origin && origin !== new URL(request.url).origin) return Response.json({ error: 'Invalid origin' }, { status: 403 });
-  const limit = await enforceIpLimit(request, 'page-counter', 30, 60);
+  if (!origin || origin !== new URL(request.url).origin) return Response.json({ error: 'Invalid origin' }, { status: 403 });
+  const limit = await enforceIpAndGlobalLimits(request, 'page-counter', 30, 60, 200000, 86400);
   if (!limit.allowed) return rateLimited(limit.retryAfterSeconds);
 
   try {
